@@ -2145,3 +2145,56 @@ void UUINavPCComponent::ClearAnalogKeysFromPressedKeys(const FKey& PressedKey)
 	}
 
 }
+
+FGuid UUINavPCComponent::GoToWidgetAsync(
+	TSoftClassPtr<UUINavWidget> WidgetClass,
+	const FOnWidgetLoaded& OnLoadCompleted,
+	const FOnWidgetLoadFailed& OnLoadFailed,
+	bool bRemoveParent,
+	bool bDestroyParent,
+	int32 ZOrder,
+	int32 Priority)
+{
+	UUINavAsyncWidgetManager* AsyncManager = GetAsyncWidgetManager();
+	if (!AsyncManager)
+	{
+		UINAV_LOG("GoToWidgetAsync: Failed to get AsyncWidgetManager");
+		if (OnLoadFailed.IsBound())
+		{
+			OnLoadFailed.ExecuteIfBound(TEXT("Failed to get AsyncWidgetManager"));
+		}
+		return FGuid();
+	}
+
+	return AsyncManager->LoadWidgetAsync(
+		WidgetClass,
+		OnLoadCompleted,
+		OnLoadFailed,
+		bRemoveParent,
+		bDestroyParent,
+		ZOrder,
+		Priority
+	);
+}
+
+bool UUINavPCComponent::CancelWidgetLoad(const FGuid& RequestId)
+{
+	UUINavAsyncWidgetManager* AsyncManager = GetAsyncWidgetManager();
+	if (!AsyncManager)
+	{
+		UINAV_LOG("CancelWidgetLoad: Failed to get AsyncWidgetManager");
+		return false;
+	}
+
+	return AsyncManager->CancelLoadRequest(RequestId);
+}
+
+UUINavAsyncWidgetManager* UUINavPCComponent::GetAsyncWidgetManager() const
+{
+	if (!IsValid(PC) || !PC->GetWorld())
+	{
+		return nullptr;
+	}
+
+	return UUINavAsyncWidgetManager::GetInstance(PC);
+}

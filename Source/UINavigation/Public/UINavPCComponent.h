@@ -666,4 +666,23 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, Category = UINavController)
     FORCEINLINE bool IsMovingThumbstick() const { return ThumbstickDelta.X != 0.0f || ThumbstickDelta.Y != 0.0f; }
 
+.	// 异步加载并打开Widget (便捷方法)
+	UFUNCTION(BlueprintCallable, Category = UINavController)
+	FGuid GoToWidgetAsync(
+		TSoftClassPtr<UUINavWidget> WidgetClass,
+		const FOnWidgetLoaded& OnLoadCompleted,
+		const FOnWidgetLoadFailed& OnLoadFailed = FOnWidgetLoadFailed(),
+		bool bRemoveParent = false,
+		bool bDestroyParent = false,
+		int32 ZOrder = 0,
+		int32 Priority = 0
+	);
+
+	// 取消异步Widget加载
+	UFUNCTION(BlueprintCallable, Category = UINavController)
+	bool CancelWidgetLoad(const FGuid& RequestId);
+
+	// 获取异步Widget管理器
+	UFUNCTION(BlueprintCallable, Category = UINavController)
+	class UUINavAsyncWidgetManager* GetAsyncWidgetManager() const;
 };
